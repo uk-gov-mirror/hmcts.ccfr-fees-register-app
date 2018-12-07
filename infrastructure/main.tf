@@ -59,7 +59,7 @@ module "fees-register-api" {
 }
 
 module "fees-register-database" {
-  source = "git@github.com:hmcts/moj-module-postgres?ref=master"
+  source = "git@github.com:hmcts/moj-module-postgres?ref=vnetrulesv1.1"
   product = "${var.product}-postgres-db"
   location = "${var.location}"
   env = "${var.env}"
