@@ -3,6 +3,7 @@ package uk.gov.hmcts.fees2.register.api.controllers.mapper;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.fees2.register.api.contract.loader.request.LoaderFixedFeeDto;
@@ -17,6 +18,7 @@ import java.util.List;
 @Data
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Builder(builderMethodName = "feeLoaderJsonMapperWith")
+@NoArgsConstructor
 public class FeeLoaderJsonMapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(FeeLoaderJsonMapper.class);
