@@ -1,9 +1,9 @@
 plugins {
     id 'application'
     id "org.sonarqube" version "2.6.1"
-    id 'org.springframework.boot' version '2.1.6.RELEASE'
+    id 'org.springframework.boot' version '2.2.5.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
-    id 'org.owasp.dependencycheck' version '5.1.1'
+    id 'org.owasp.dependencycheck' version '5.2.4'
     id "com.gorylenko.gradle-git-properties" version "1.4.21"
     id 'findbugs'
     id 'jacoco'
@@ -20,6 +20,9 @@ allprojects {
     }
     version = rootProject.file('version.txt').text.trim() + ".${buildNumber}"
 
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
     repositories {
         mavenLocal()
         maven { url "https://dl.bintray.com/hmcts/hmcts-maven" }
@@ -27,14 +30,14 @@ allprojects {
     }
     dependencyManagement {
         imports {
-            mavenBom "org.springframework.boot:spring-boot-dependencies:2.1.5.RELEASE"
+            mavenBom "org.springframework.boot:spring-boot-dependencies:2.2.5.RELEASE"
         }
         dependencies {
             // solves CVE-2019-12086
             // remove once spring manager incorporates this changes
             dependencySet(
                     group: 'com.fasterxml.jackson.core',
-                    version: '2.9.9'
+                    version: '2.10.1'
                     //version: dependencyManagement.importedProperties['jackson.version'] solves CVE-2019-12086
             ) {
                 entry 'jackson-core'
@@ -51,15 +54,15 @@ subprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'com.jfrog.bintray'
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
     }
 
     dependencies {
-        compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version:'2.9.9.1'
-        compile group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version: '0.0.4'
+        compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version:'2.10.0'
+        compile (group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version: '0.0.4') {
+            exclude(module: 'netty-tcnative-boringssl-static')
+        }
         testCompile group: 'junit', name: 'junit', version: '4.12'
         testCompile group: 'org.assertj', name: 'assertj-core', version: '3.8.0'
         compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.2'
@@ -214,3 +217,6 @@ run {
     }
 }
 
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+}

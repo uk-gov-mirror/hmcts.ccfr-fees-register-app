@@ -45,8 +45,10 @@ def secrets = [
 withPipeline(type, product, app) {
     overrideVaultEnvironments(vaultOverrides)
     loadVaultSecrets(secrets)
-    enableDbMigration('ccpay')
-    enableDockerBuild()
+    enableDbMigration('fees-register')
+    //enableDockerBuild()
     installCharts()
     enableSlackNotifications('#cc-payments-tech')
+    enableAksStagingDeployment()
+    disableLegacyDeploymentOnAAT()
 }
