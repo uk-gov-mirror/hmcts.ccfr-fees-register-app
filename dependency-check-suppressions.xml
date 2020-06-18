@@ -10,10 +10,8 @@
     </suppress>
 
     <suppress>
-        <notes>We are on latest version , but these are coming form mvn:pkg </notes>
+        <notes>We are on latest version , these are coming form mvn:pkg </notes>
         <cve>CVE-2020-10683</cve>
-        <cve>CVE-2016-5394</cve>
-        <cve>CVE-2016-6798</cve>
         <cve>CVE-2020-13692</cve>
     </suppress>
 </suppressions>
