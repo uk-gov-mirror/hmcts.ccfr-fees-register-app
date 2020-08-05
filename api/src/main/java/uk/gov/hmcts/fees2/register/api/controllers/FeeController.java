@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.hmcts.fees2.register.api.contract.Fee2Dto;
-import uk.gov.hmcts.fees2.register.api.contract.FeeVersionDto;
 import uk.gov.hmcts.fees2.register.api.contract.request.*;
 import uk.gov.hmcts.fees2.register.api.controllers.exceptions.ForbiddenException;
 import uk.gov.hmcts.fees2.register.api.controllers.mapper.FeeDtoMapper;
@@ -38,6 +37,8 @@ import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.fees2.register.util.SecurityUtils.getFeesAuthor;
 
 @Api(value = "FeesRegister")
 @RestController
@@ -74,7 +75,7 @@ public class FeeController {
         Principal principal) {
 
         Fee fee = feeService.save(
-            feeDtoMapper.toFee(request, principal != null ? principal.getName() : null)
+            feeDtoMapper.toFee(request, getFeesAuthor(principal))
         );
 
         if (response != null) {
@@ -97,7 +98,7 @@ public class FeeController {
                                 HttpServletResponse response,
                                 Principal principal) {
         RangedFee fee = (RangedFee) feeService.get(code);
-        feeDtoMapper.updateRangedFee(request, fee, principal != null ? principal.getName() : null);
+        feeDtoMapper.updateRangedFee(request, fee, getFeesAuthor(principal));
     }
 
 
@@ -115,7 +116,7 @@ public class FeeController {
                                HttpServletResponse response,
                                Principal principal) {
         FixedFee fee = (FixedFee) feeService.get(code);
-        feeDtoMapper.updateFixedFee(request, fee, principal != null ? principal.getName() : null);
+        feeDtoMapper.updateFixedFee(request, fee, getFeesAuthor(principal));
     }
 
 
@@ -131,7 +132,7 @@ public class FeeController {
                                HttpServletResponse response,
                                Principal principal) {
 
-        Fee fee = feeDtoMapper.toFee(request, principal != null ? principal.getName() : null);
+        Fee fee = feeDtoMapper.toFee(request, getFeesAuthor(principal));
 
         fee = feeService.save(fee);
 
@@ -152,7 +153,7 @@ public class FeeController {
                                   HttpServletResponse response,
                                   Principal principal) {
 
-        Fee fee = feeDtoMapper.toFee(request, principal != null ? principal.getName() : null);
+        Fee fee = feeDtoMapper.toFee(request, getFeesAuthor(principal));
 
         fee = feeService.save(fee);
 
@@ -174,7 +175,7 @@ public class FeeController {
                                     HttpServletResponse response,
                                     Principal principal) {
 
-        Fee fee = feeDtoMapper.toFee(request, principal != null ? principal.getName() : null);
+        Fee fee = feeDtoMapper.toFee(request, getFeesAuthor(principal));
 
         fee = feeService.save(fee);
 
@@ -195,7 +196,7 @@ public class FeeController {
                                 HttpServletResponse response,
                                 Principal principal) {
 
-        Fee fee = feeDtoMapper.toFee(request, principal != null ? principal.getName() : null);
+        Fee fee = feeDtoMapper.toFee(request, getFeesAuthor(principal));
 
         fee = feeService.save(fee);
 
@@ -220,7 +221,7 @@ public class FeeController {
 
         List<Fee> fixedFees = fixedFeeDtos
             .stream()
-            .map(fixedFeeDto -> feeDtoMapper.toFee(fixedFeeDto, principal != null ? principal.getName() : null))
+            .map(fixedFeeDto -> feeDtoMapper.toFee(fixedFeeDto, getFeesAuthor(principal)))
             .collect(Collectors.toList());
 
         feeService.save(fixedFees);
@@ -292,33 +293,19 @@ public class FeeController {
         SearchFeeDto searchFeeDto = new SearchFeeDto(amount, service, jurisdiction1, jurisdiction2, channel, event, applicantType, unspecifiedClaimAmounts, isDraft);
         SearchFeeVersionDto searchFeeVersionDto = new SearchFeeVersionDto(author, approvedBy, isActive, isExpired, discontinued, feeVersionStatus, description, siRefId, feeVersionAmount);
 
-        LOG.info("SearchFeeDto: {}", Encode.forJava(searchFeeDto.toString()));
-        LOG.info("SearchFeeVersionDto {}: ", Encode.forJava(searchFeeVersionDto.toString()));
-
         if (searchFeeVersionDto.isNoFieldSet()) {
-            LOG.info("Inside if block, when no field is set... ");
             result = feeSearchService.search(searchFeeDto)
                 .stream()
                 .map(feeDtoMapper::toFeeDto)
                 .collect(Collectors.toList());
-            LOG.info("Query executed when no field is set... ");
         } else {
-            LOG.info("Inside else block, when fields are set... ");
             result = feeSearchService
                 .search(searchFeeDto, searchFeeVersionDto)
                 .stream()
                 .map(feeDtoMapper::toFeeDto)
                 .collect(Collectors.toList());
-            LOG.info("Query executed when fields are set... ");
         }
-        final String encodedCount = Encode.forJava(String.valueOf(result.size()));
-        LOG.info("getAllFees() method: /fees-register/fees: Executed successfully. Count: {}", encodedCount);
-        for (Fee2Dto fee: result) {
-            final FeeVersionDto currentVersion = fee.getCurrentVersion();
-            final String encodedauthor = Encode.forJava(currentVersion.getAuthor());
-            final String encodedStatus = Encode.forJava(currentVersion.getStatus().toString());
-            LOG.info("Author: {0}, Status {1}",encodedauthor, encodedStatus);
-        }
+
         return result;
     }
 
