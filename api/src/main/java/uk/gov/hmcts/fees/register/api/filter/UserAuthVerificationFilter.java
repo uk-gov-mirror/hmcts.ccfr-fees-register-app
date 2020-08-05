@@ -2,6 +2,7 @@ package uk.gov.hmcts.fees.register.api.filter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
@@ -44,7 +45,7 @@ public class UserAuthVerificationFilter extends OncePerRequestFilter {
         Optional<String> userIdOptional = userIdExtractor.apply(request);
         final String bearerToken = request.getHeader(SecurityUtils.AUTHORISATION);
         UserInfo userInfo = null;
-        if ((securityUtils.isAuthenticated() || bearerToken != null) && (!authorizedRoles.isEmpty() || userIdOptional.isPresent())) {
+        if (!skipFeesApi(request.getRequestURI(),request.getMethod()) && (securityUtils.isAuthenticated() || bearerToken != null) && (!authorizedRoles.isEmpty() || userIdOptional.isPresent())) {
             try {
                 userInfo = verifyRoleAndUserId(authorizedRoles, userIdOptional, request);
             } catch (UnauthorizedException ex) {
@@ -57,6 +58,15 @@ public class UserAuthVerificationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    public boolean skipFeesApi (String requestUri, String requestMethod) {
+        String feesUri = "/fees-register/fees";
+        if ((requestUri != null && requestUri.equalsIgnoreCase(feesUri)) &&
+            (requestMethod != null && requestMethod.equalsIgnoreCase(HttpMethod.GET.toString()))) {
+           return true;
+        }
+      return false;
     }
 
     private UserInfo verifyRoleAndUserId(Collection<String> authorizedRoles, Optional<String> userIdOptional, HttpServletRequest httpRequest) {
