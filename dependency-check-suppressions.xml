@@ -16,6 +16,11 @@
     </suppress>
 
     <suppress>
+        <notes> Transitively dependent on Current SpringBoot Version : need Spring boot 2.2.10</notes>
+        <cve>CVE-2020-5421</cve>
+    </suppress>
+
+    <suppress>
         <notes>Latest CVE's </notes>
         <cve>CVE-2020-11996</cve>
         <cve>CVE-2019-14900</cve>
@@ -23,5 +28,13 @@
         <cve>CVE-2020-13935</cve>
         <cve>CVE-2020-8022</cve>
         <cve>CVE-2017-18640</cve>
+        <cve>CVE-2020-24616</cve>
+        <cve>CVE-2017-18640</cve>
+        <cve>CVE-2020-5421</cve>
+    </suppress>
+    <suppress>
+        <notes> False positive reported at https://github.com/jeremylong/DependencyCheck/issues/1658 </notes>
+        <cve>CVE-2007-1651</cve>
+        <cve>CVE-2007-1652</cve>
     </suppress>
 </suppressions>
