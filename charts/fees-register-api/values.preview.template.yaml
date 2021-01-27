@@ -17,7 +17,6 @@ java:
       postgresqlPassword: fees-register
       postgresqlDatabase: fees-register
 
-
   postgresql:
     enabled: true
 
