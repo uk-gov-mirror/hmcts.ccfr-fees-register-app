@@ -1,8 +1,9 @@
 package uk.gov.hmcts.fees.register.functional;
 
+import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
 import org.assertj.core.api.Assertions;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.fees.register.functional.dsl.FeesRegisterTestDsl;
 import uk.gov.hmcts.fees2.register.data.dto.response.FeeLookupResponseDto;
@@ -10,6 +11,9 @@ import uk.gov.hmcts.fees2.register.data.dto.response.FeeLookupResponseDto;
 import java.io.IOException;
 import java.math.BigDecimal;
 
+import static java.lang.Double.parseDouble;
+
+@RunWith(SpringIntegrationSerenityRunner.class)
 public class Fees2APIFeeControllerTest extends IntegrationTestBase {
 
     @Autowired
@@ -583,7 +587,7 @@ public class Fees2APIFeeControllerTest extends IntegrationTestBase {
     public void getlookupresponseMessageForProbate() throws IOException {
 
         scenario.given()
-            .when().getLookUpForProbateResponse("probate", "family", "probate registry", "default", "issue", "all", new BigDecimal("5000.01"))
+            .when().getLookUpForProbateResponseWithKeywordApplicationType("probate", "family", "probate registry", "default", "issue", "all", parseDouble("5000.01"),"SA")
             .then().ok().got(FeeLookupResponseDto.class, FeeLookupResponseDto -> {
             Assertions.assertThat(FeeLookupResponseDto.getCode()).isEqualTo("FEE0219");
             Assertions.assertThat(FeeLookupResponseDto.getVersion()).isNotNull();
@@ -595,11 +599,11 @@ public class Fees2APIFeeControllerTest extends IntegrationTestBase {
     public void getlookupresponseMessageForProbateCopies() throws IOException {
 
         scenario.given()
-            .when().getLookUpForProbateResponse("probate", "family", "probate registry", "default", "copies", "all", new BigDecimal("5000"))
+            .when().getLookUpForProbateResponseCopiesGrantWill("probate", "family", "probate registry", "default", "copies", "all", new BigDecimal("5000"),"GrantWill")
             .then().ok().got(FeeLookupResponseDto.class, FeeLookupResponseDto -> {
-            Assertions.assertThat(FeeLookupResponseDto.getCode()).isEqualTo("FEE0003");
+            Assertions.assertThat(FeeLookupResponseDto.getCode()).isEqualTo("FEE0546");
             Assertions.assertThat(FeeLookupResponseDto.getVersion()).isNotNull();
-            Assertions.assertThat(FeeLookupResponseDto.getFeeAmount()).isEqualTo("2500.00");
+            Assertions.assertThat(FeeLookupResponseDto.getFeeAmount()).isEqualTo("7500.00");
         });
     }
 
@@ -607,11 +611,11 @@ public class Fees2APIFeeControllerTest extends IntegrationTestBase {
     public void getlookupresponseMessageForProbateCopies2() throws IOException {
 
         scenario.given()
-            .when().getLookUpForProbateResponse("probate", "family", "probate registry", "default", "copies", "all", new BigDecimal("1"))
+            .when().getLookUpForProbateResponseCopiesGrantWill("probate", "family", "probate registry", "default", "copies", "all", new BigDecimal("1"),"GrantWill")
             .then().ok().got(FeeLookupResponseDto.class, FeeLookupResponseDto -> {
-            Assertions.assertThat(FeeLookupResponseDto.getCode()).isEqualTo("FEE0003");
+            Assertions.assertThat(FeeLookupResponseDto.getCode()).isEqualTo("FEE0546");
             Assertions.assertThat(FeeLookupResponseDto.getVersion()).isNotNull();
-            Assertions.assertThat(FeeLookupResponseDto.getFeeAmount()).isEqualTo("0.50");
+            Assertions.assertThat(FeeLookupResponseDto.getFeeAmount()).isEqualTo("1.50");
         });
     }
 
@@ -619,7 +623,7 @@ public class Fees2APIFeeControllerTest extends IntegrationTestBase {
     public void getlookupresponseMessageForProbateApplicatTypePersonal() throws IOException {
 
         scenario.given()
-            .when().getLookUpForProbateResponse("probate", "family", "probate registry", "default", "issue", "personal", new BigDecimal("5000.01"))
+            .when().getLookUpForProbateResponseWithKeywordApplicationType("probate", "family", "probate registry", "default", "issue", "personal",5000.01, "PA")
             .then().ok().got(FeeLookupResponseDto.class, FeeLookupResponseDto -> {
             Assertions.assertThat(FeeLookupResponseDto.getCode()).isEqualTo("FEE0226");
             Assertions.assertThat(FeeLookupResponseDto.getVersion()).isNotNull();
@@ -627,29 +631,62 @@ public class Fees2APIFeeControllerTest extends IntegrationTestBase {
         });
     }
 
-    @Ignore
-    @Test
-    public void getlookupresponseMessage1() throws IOException {
-
-        scenario.given().userId("1")
-            .when().getLookUpResponse("divorce", "family", "family court", "default", "issue")
-            .then().ok().got(FeeLookupResponseDto.class, FeeLookupResponseDto -> {
-            Assertions.assertThat(FeeLookupResponseDto.getCode()).isEqualTo("X0165");
-            Assertions.assertThat(FeeLookupResponseDto.getVersion()).isNotNull();
-            Assertions.assertThat(FeeLookupResponseDto.getFeeAmount()).isEqualTo("550.00");
-        });
-    }
-
-
     @Test
     public void getLookupResponseForProbateFeeWithMaxRangeAs5000() {
 
         scenario.given()
-            .when().getLookUpForProbateResponse("probate", "family", "probate registry", "default", "issue", "personal", new BigDecimal("5000"))
+            .when().getLookUpResponsewithkeywordAmount("probate", "family", "probate registry", "default", "issue", "PAL5K", 5000)
             .then().ok().got(FeeLookupResponseDto.class, feeLookupResponseDto -> {
                 Assertions.assertThat(feeLookupResponseDto.getDescription()).isEqualTo("Personal Application for grant of Probate");
                 Assertions.assertThat(feeLookupResponseDto.getVersion()).isNotNull();
-                Assertions.assertThat(feeLookupResponseDto.getFeeAmount()).isEqualTo(new BigDecimal("0.00"));
+                Assertions.assertThat(feeLookupResponseDto.getFeeAmount()).isEqualTo("0.00");
+        });
+    }
+
+    @Test
+    public void getlookupresponseMessageForProbateCopiesGrantWill() throws IOException {
+
+        scenario.given()
+            .when().getLookUpForProbateResponseCopiesGrantWill("probate", "family", "probate registry", "default", "copies", "all", new BigDecimal("2"),"GrantWill")
+            .then().ok().got(FeeLookupResponseDto.class, FeeLookupResponseDto -> {
+            Assertions.assertThat(FeeLookupResponseDto.getVersion()).isNotNull();
+            Assertions.assertThat(FeeLookupResponseDto.getFeeAmount()).isEqualTo("3.00");
+        });
+    }
+
+    @Test
+    public void getLookupResponseForProbateFeeWithCaveat() {
+
+        scenario.given()
+            .when().getLookUpResponsewithKeywordFixedFee("probate", "family", "probate registry", "default", "miscellaneous", "Caveat")
+            .then().ok().got(FeeLookupResponseDto.class, feeLookupResponseDto -> {
+            Assertions.assertThat(feeLookupResponseDto.getDescription()).isEqualTo("Application for the entry or extension of a caveat");
+            Assertions.assertThat(feeLookupResponseDto.getVersion()).isNotNull();
+            Assertions.assertThat(feeLookupResponseDto.getFeeAmount()).isEqualTo("3.00");
+        });
+    }
+
+    @Test
+    public void getLookupResponseForProbateFeeWithKeywordSAL5K() {
+
+        scenario.given()
+            .when().getLookUpResponsewithkeywordAmount("probate", "family", "probate registry", "default", "issue", "SAL5K", 5000)
+            .then().ok().got(FeeLookupResponseDto.class, feeLookupResponseDto -> {
+            Assertions.assertThat(feeLookupResponseDto.getDescription()).isEqualTo("Application for a grant of probate (Estate under 5000 GBP)");
+            Assertions.assertThat(feeLookupResponseDto.getVersion()).isNotNull();
+            Assertions.assertThat(feeLookupResponseDto.getFeeAmount()).isEqualTo("0.00");
+        });
+    }
+
+    @Test
+    public void getLookupResponseForProbateFeeWithKeywordSA() {
+
+        scenario.given()
+            .when().getLookUpResponsewithkeywordAmount("probate", "family", "probate registry", "default", "issue", "SA", 5000.01)
+            .then().ok().got(FeeLookupResponseDto.class, feeLookupResponseDto -> {
+            Assertions.assertThat(feeLookupResponseDto.getDescription()).isEqualTo("Application for a grant of probate (Estate over 5000 GBP)");
+            Assertions.assertThat(feeLookupResponseDto.getVersion()).isNotNull();
+            Assertions.assertThat(feeLookupResponseDto.getFeeAmount()).isEqualTo("155.00");
         });
     }
 
@@ -659,7 +696,7 @@ public class Fees2APIFeeControllerTest extends IntegrationTestBase {
         scenario.given()
             .when().getLookUpResponsewithkeyword("public law", "family", "family court", "default", "issue", "CareOrder")
             .then().ok().got(FeeLookupResponseDto.class, FeeLookupResponseDto -> {
-            Assertions.assertThat(FeeLookupResponseDto.getCode()).isEqualTo("FEE0314");
+            Assertions.assertThat(FeeLookupResponseDto.getCode()).isEqualTo("FEE0313");
             Assertions.assertThat(FeeLookupResponseDto.getDescription()).isEqualTo("Application for proceedings under Section 31 of Act");
             Assertions.assertThat(FeeLookupResponseDto.getVersion()).isNotNull();
             Assertions.assertThat(FeeLookupResponseDto.getFeeAmount()).isEqualTo("2055.00");

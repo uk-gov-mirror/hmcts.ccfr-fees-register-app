@@ -1,8 +1,9 @@
 package uk.gov.hmcts.fees.register.functional;
 
+import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
 import org.assertj.core.api.Assertions;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.fees.register.api.contract.*;
 import uk.gov.hmcts.fees.register.functional.dsl.FeesRegisterTestDsl;
@@ -19,6 +20,7 @@ import static uk.gov.hmcts.fees.register.api.contract.PercentageFeeDto.percentag
 import static uk.gov.hmcts.fees.register.api.contract.RangeGroupDto.rangeGroupDtoWith;
 import static uk.gov.hmcts.fees.register.api.contract.RangeGroupUpdateDto.rangeGroupUpdateDtoWith;
 
+@RunWith(SpringIntegrationSerenityRunner.class)
 public class CategoriesIntegrationForCMCTest extends IntegrationTestBase {
 
     @Autowired
@@ -29,49 +31,17 @@ public class CategoriesIntegrationForCMCTest extends IntegrationTestBase {
             .rangeGroupCode("cmc-online")
             .feeCodes(asList("X0026", "X0027"));
 
-    @Ignore
-    @Test
-    public void createCategoriesCode201() throws IOException {
-        scenario.given()
-                .userId("1")
-                .when().createCategory(proposeCategory)
-                .then().created((categoryDto -> {
-                    Assertions.assertThat(categoryDto.getDescription()).isEqualTo("New Description");
-                })
-        );
-    }
-
     private PercentageFeeDto.PercentageFeeDtoBuilder proposePercentage = percentageFeeDtoWith()
             .code("X0434")
             .description("Civil Court fees - Money Claims Online - Claim Amount - 10000.01 upto 15000 GBP. Fees are 4.5% of the claim value")
             .percentage(BigDecimal.valueOf(4.5));
-    @Ignore
-    @Test
-    public void createPercentage201() throws IOException {
-        scenario.given()
-                //.userId("1")
-                .when().createPercentage(proposePercentage)
-                .then().createdPercentage((feeDto -> {
-                    Assertions.assertThat(feeDto.getDescription()).isEqualTo("Civil Court fees - Money Claims Online - Claim Amount - 10000.01 upto 15000 GBP. Fees are 4.5% of the claim value");
-                })
-        );
-    }
+
 
     private FixedFeeDto.FixedFeeDtoBuilder proposeFees = fixedFeeDtoWith()
             .code("X0999")
             .description("New Description")
             .amount(101);
-    @Ignore
-    @Test
-    public void createFeesCode201() throws IOException {
-        scenario.given()
-                .userId("80")
-                .when().createFees(proposeFees)
-                .then().createdFees((feeDto -> {
-                    Assertions.assertThat(feeDto.getDescription()).isEqualTo("New Description");
-                })
-        );
-    }
+
 
     private RangeGroupUpdateDto.RangeGroupUpdateDtoBuilder proposeRangeGroup = rangeGroupUpdateDtoWith()
             .description("New Description")
@@ -80,17 +50,7 @@ public class CategoriesIntegrationForCMCTest extends IntegrationTestBase {
                     new RangeGroupUpdateDto.RangeUpdateDto(1001, null, "X0047")
 
             ));
-    @Ignore
-    @Test
-    public void createRangeGroup201() throws IOException {
-        scenario.given()
-                //.userId("1")
-                .when().createRangeGroups(proposeRangeGroup)
-                .then().createdRangeGroups((reangeGroupDto -> {
-                    Assertions.assertThat(reangeGroupDto.getDescription()).isEqualTo("New Description");
-                })
-        );
-    }
+
 
     @Test
     public void findAllCategories() throws IOException, NoSuchFieldException {
